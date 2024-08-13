@@ -1,7 +1,16 @@
+import express from "express"
+import "dotenv/config"
 
 
-export default async function init(msg) {
+const PORT = process.env.PORT ||8080
+const app = express()
 
-    console.log(msg);
-}
-init("Welcome to Server")
+app.get("/", (req, res) => {
+    res.status(200).json({
+        message: "OK All Working...."
+    })
+})
+
+app.listen(PORT, () => {
+    console.log(`Server is Listening on Port ${PORT}`);
+})
