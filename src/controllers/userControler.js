@@ -75,19 +75,17 @@ const getUser = async (req, res) => {
 
 const getSingleUserById = async (req, res) => {
     try {
-        const { id } = req.params; // Extract user ID from request parameters
+        const { id } = req.params;
 
-        // Fetch user by ID
         const user = await prisma.user.findUnique({
-            where: { id: Number(id) }, // Ensure the ID is a number
+            where: { id: Number(id) },
         });
 
-        // Check if user exists
+
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: `User with ${id} not found` });
         }
 
-        // Return the user data
         return res.json(user);
     } catch (error) {
         console.error("Error fetching user by ID:", error);
@@ -121,4 +119,22 @@ const updateUserById = async (req, res) => {
 }
 
 
-export { register, getUser, getSingleUserById, updateUserById };
+const deleteUserById = async (req, res) => {
+
+    try {
+        const id = req.params.id
+        await prisma.user.delete({
+            where: {
+                id: Number(id)
+            }
+        })
+
+        return res.status(201).json({
+            message: `user ${id} Deleted Successfully`
+        })
+    } catch (error) {
+        throw new error(`Something Went Wrong while deleting ${id} this user `, error)
+    }
+}
+
+export { register, getUser, getSingleUserById, updateUserById, deleteUserById };
