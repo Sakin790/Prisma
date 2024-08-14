@@ -95,7 +95,30 @@ const getSingleUserById = async (req, res) => {
     }
 };
 
+const updateUserById = async (req, res) => {
+
+    try {
+        const userId = req.params.id
+        const { username, email, password } = req.body
+
+        const updateUser = await prisma.user.update({
+            where: {
+                id: Number(userId)
+            },
+            data: {
+                username,
+                email,
+                password
+            }
+        })
+        return res.status(201).json({
+            message: `User With Id ${userId} Updated Successfully`,
+            updateUser
+        })
+    } catch (error) {
+        throw new error("Something Went Wrong", error)
+    }
+}
 
 
-
-export { register, getUser, getSingleUserById };
+export { register, getUser, getSingleUserById, updateUserById };
