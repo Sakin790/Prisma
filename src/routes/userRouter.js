@@ -1,5 +1,5 @@
 import { health } from "../controllers/healthcheck.js";
-import { register } from "../controllers/userControler.js";
+import { register, getUser, getSingleUserById } from "../controllers/userControler.js";
 
 import { Router } from "express";
 
@@ -8,6 +8,8 @@ const router = Router()
 
 router.route("/register").post(register)
 router.route("/health").get(health)
+router.route("/getall").get(getUser)
+router.route("/user/:id").get(getSingleUserById)
 
 export {
     router
