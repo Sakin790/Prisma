@@ -1,6 +1,22 @@
 import { prisma } from "../db/db.config.js"
 import bcrypt from 'bcrypt';
-import express from "express"
+import jwt from "jsonwebtoken"
+import "dotenv/config"
+
+
+
+
+
+const authenticateToken = (req, res, next) => {
+    const token = req.header('authorization')?.split(' ')[1];
+    if (!token) return res.sendStatus(401);
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+};
 
 const register = async (req, res) => {
     const { username, email, password } = req.body;
@@ -41,6 +57,46 @@ const register = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error' });
     }
 };
+const login = async () => {
+    const { email, password } = req.body;
+    console.log('Login attempt:', { email });
+
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    try {
+
+        const user = await prisma.user.findUnique({
+            where: {
+                email: email,
+            },
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid email or password' });
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ message: 'Invalid email or password' });
+        }
+
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        return res.status(200).json({ message: 'Login successful', token });
+
+    } catch (error) {
+        console.error('Error during login:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+
+}
+
+
 
 const getUser = async (req, res) => {
     try {
@@ -114,7 +170,7 @@ const updateUserById = async (req, res) => {
             updateUser
         })
     } catch (error) {
-        throw new error("Something Went Wrong", error)
+        console.log(error);
     }
 }
 
@@ -137,4 +193,9 @@ const deleteUserById = async (req, res) => {
     }
 }
 
-export { register, getUser, getSingleUserById, updateUserById, deleteUserById };
+
+const createTodo = async (req, res) => {
+
+}
+
+export { login, register, getUser, getSingleUserById, updateUserById, deleteUserById, createTodo };
